@@ -107,7 +107,9 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame*>& vpKFs, const vector<Ma
 
   for (size_t i = 0; i < vpKFs.size(); i++) {
     KeyFrame* pKF = vpKFs[i];
-    if (pKF->isBad()) continue;
+    if (pKF->isBad()) {
+      continue;
+    }
     g2o::VertexSE3Expmap* vSE3 = new g2o::VertexSE3Expmap();
     Sophus::SE3<float> Tcw = pKF->GetPose();
     vSE3->setEstimate(
@@ -124,7 +126,9 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame*>& vpKFs, const vector<Ma
   // Set MapPoint vertices
   for (size_t i = 0; i < vpMP.size(); i++) {
     MapPoint* pMP = vpMP[i];
-    if (pMP->isBad()) continue;
+    if (pMP->isBad()) {
+      continue;
+    }
     g2o::VertexSBAPointXYZ* vPoint = new g2o::VertexSBAPointXYZ();
     vPoint->setEstimate(pMP->GetWorldPos().cast<double>());
     const int id = pMP->mnId + maxKFid + 1;
@@ -139,8 +143,12 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame*>& vpKFs, const vector<Ma
     for (map<KeyFrame*, tuple<int, int>>::const_iterator mit = observations.begin();
          mit != observations.end(); mit++) {
       KeyFrame* pKF = mit->first;
-      if (pKF->isBad() || pKF->mnId > maxKFid) continue;
-      if (optimizer.vertex(id) == NULL || optimizer.vertex(pKF->mnId) == NULL) continue;
+      if (pKF->isBad() || pKF->mnId > maxKFid) {
+        continue;
+      }
+      if (optimizer.vertex(id) == NULL || optimizer.vertex(pKF->mnId) == NULL) {
+        continue;
+      }
       nEdges++;
 
       const int leftIndex = get<0>(mit->second);
@@ -263,7 +271,9 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame*>& vpKFs, const vector<Ma
   // Keyframes
   for (size_t i = 0; i < vpKFs.size(); i++) {
     KeyFrame* pKF = vpKFs[i];
-    if (pKF->isBad()) continue;
+    if (pKF->isBad()) {
+      continue;
+    }
     g2o::VertexSE3Expmap* vSE3 = static_cast<g2o::VertexSE3Expmap*>(optimizer.vertex(pKF->mnId));
 
     g2o::SE3Quat SE3quat = vSE3->estimate();
@@ -292,7 +302,9 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame*>& vpKFs, const vector<Ma
             continue;
           }
 
-          if (pMP->isBad()) continue;
+          if (pMP->isBad()) {
+            continue;
+          }
 
           if (e->chi2() > 5.991 || !e->isDepthPositive()) {
             numMonoBadPoints++;
@@ -308,11 +320,9 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame*>& vpKFs, const vector<Ma
           MapPoint* pMP = vpMapPointEdgeStereo[i2];
           KeyFrame* pKFedge = vpEdgeKFMono[i2];
 
-          if (pKF != pKFedge) {
+          if (pKF != pKFedge or pMP->isBad()) {
             continue;
           }
-
-          if (pMP->isBad()) continue;
 
           if (e->chi2() > 7.815 || !e->isDepthPositive()) {
             numStereoBadPoints++;
@@ -327,11 +337,15 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame*>& vpKFs, const vector<Ma
 
   // Points
   for (size_t i = 0; i < vpMP.size(); i++) {
-    if (vbNotIncludedMP[i]) continue;
+    if (vbNotIncludedMP[i]) {
+      continue;
+    }
 
     MapPoint* pMP = vpMP[i];
 
-    if (pMP->isBad()) continue;
+    if (pMP->isBad()) {
+      continue;
+    }
     g2o::VertexSBAPointXYZ* vPoint =
         static_cast<g2o::VertexSBAPointXYZ*>(optimizer.vertex(pMP->mnId + maxKFid + 1));
 
@@ -373,7 +387,9 @@ void Optimizer::FullInertialBA(Map* pMap, int its, const bool bFixLocal,
   KeyFrame* pIncKF;
   for (size_t i = 0; i < vpKFs.size(); i++) {
     KeyFrame* pKFi = vpKFs[i];
-    if (pKFi->mnId > maxKFid) continue;
+    if (pKFi->mnId > maxKFid) {
+      continue;
+    }
     VertexPose* VP = new VertexPose(pKFi);
     VP->setId(pKFi->mnId);
     pIncKF = pKFi;
@@ -428,8 +444,10 @@ void Optimizer::FullInertialBA(Map* pMap, int its, const bool bFixLocal,
     }
 
     if (pKFi->mPrevKF && pKFi->mnId <= maxKFid) {
-      if (pKFi->isBad() || pKFi->mPrevKF->mnId > maxKFid) continue;
-      if (pKFi->bImu && pKFi->mPrevKF->bImu) {
+      if (pKFi->isBad() || pKFi->mPrevKF->mnId > maxKFid) {
+        continue;
+      }
+      if (pKFi->mpImuPreintegrated && pKFi->bImu && pKFi->mPrevKF->bImu) {
         pKFi->mpImuPreintegrated->SetNewBias(pKFi->mPrevKF->GetImuBias());
         g2o::HyperGraph::Vertex* VP1 = optimizer.vertex(pKFi->mPrevKF->mnId);
         g2o::HyperGraph::Vertex* VV1 = optimizer.vertex(maxKFid + 3 * (pKFi->mPrevKF->mnId) + 1);
@@ -550,7 +568,9 @@ void Optimizer::FullInertialBA(Map* pMap, int its, const bool bFixLocal,
          mit != mend; mit++) {
       KeyFrame* pKFi = mit->first;
 
-      if (pKFi->mnId > maxKFid) continue;
+      if (pKFi->mnId > maxKFid) {
+        continue;
+      }
 
       if (!pKFi->isBad()) {
         const int leftIndex = get<0>(mit->second);
@@ -658,7 +678,9 @@ void Optimizer::FullInertialBA(Map* pMap, int its, const bool bFixLocal,
   // Keyframes
   for (size_t i = 0; i < vpKFs.size(); i++) {
     KeyFrame* pKFi = vpKFs[i];
-    if (pKFi->mnId > maxKFid) continue;
+    if (pKFi->mnId > maxKFid) {
+      continue;
+    }
     VertexPose* VP = static_cast<VertexPose*>(optimizer.vertex(pKFi->mnId));
     if (nLoopId == 0) {
       Sophus::SE3f Tcw(VP->estimate().Rcw[0].cast<float>(), VP->estimate().tcw[0].cast<float>());
@@ -700,7 +722,9 @@ void Optimizer::FullInertialBA(Map* pMap, int its, const bool bFixLocal,
 
   // Points
   for (size_t i = 0; i < vpMPs.size(); i++) {
-    if (vbNotIncludedMP[i]) continue;
+    if (vbNotIncludedMP[i]) {
+      continue;
+    }
 
     MapPoint* pMP = vpMPs[i];
     g2o::VertexSBAPointXYZ* vPoint =
@@ -1296,7 +1320,9 @@ void Optimizer::LocalBundleAdjustment(KeyFrame* pKF, bool* pbStopFlag, Map* pMap
     ORB_SLAM3::EdgeSE3ProjectXYZ* e = vpEdgesMono[i];
     MapPoint* pMP = vpMapPointEdgeMono[i];
 
-    if (pMP->isBad()) continue;
+    if (pMP->isBad()) {
+      continue;
+    }
 
     if (e->chi2() > 5.991 || !e->isDepthPositive()) {
       KeyFrame* pKFi = vpEdgeKFMono[i];
@@ -1308,7 +1334,9 @@ void Optimizer::LocalBundleAdjustment(KeyFrame* pKF, bool* pbStopFlag, Map* pMap
     ORB_SLAM3::EdgeSE3ProjectXYZToBody* e = vpEdgesBody[i];
     MapPoint* pMP = vpMapPointEdgeBody[i];
 
-    if (pMP->isBad()) continue;
+    if (pMP->isBad()) {
+      continue;
+    }
 
     if (e->chi2() > 5.991 || !e->isDepthPositive()) {
       KeyFrame* pKFi = vpEdgeKFBody[i];
@@ -1320,7 +1348,9 @@ void Optimizer::LocalBundleAdjustment(KeyFrame* pKF, bool* pbStopFlag, Map* pMap
     g2o::EdgeStereoSE3ProjectXYZ* e = vpEdgesStereo[i];
     MapPoint* pMP = vpMapPointEdgeStereo[i];
 
-    if (pMP->isBad()) continue;
+    if (pMP->isBad()) {
+      continue;
+    }
 
     if (e->chi2() > 7.815 || !e->isDepthPositive()) {
       KeyFrame* pKFi = vpEdgeKFStereo[i];
@@ -1398,7 +1428,9 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
   // Set KeyFrame vertices
   for (size_t i = 0, iend = vpKFs.size(); i < iend; i++) {
     KeyFrame* pKF = vpKFs[i];
-    if (pKF->isBad()) continue;
+    if (pKF->isBad()) {
+      continue;
+    }
     g2o::VertexSim3Expmap* VSim3 = new g2o::VertexSim3Expmap();
 
     const int nIDi = pKF->mnId;
@@ -2905,8 +2937,13 @@ void Optimizer::InertialOptimization(Map* pMap, Eigen::Matrix3d& Rwg, double& sc
     KeyFrame* pKFi = vpKFs[i];
 
     if (pKFi->mPrevKF && pKFi->mnId <= maxKFid) {
-      if (pKFi->isBad() || pKFi->mPrevKF->mnId > maxKFid) continue;
-      if (!pKFi->mpImuPreintegrated) std::cout << "Not preintegrated measurement" << std::endl;
+      if (pKFi->isBad() || pKFi->mPrevKF->mnId > maxKFid) {
+        continue;
+      };
+      if (!pKFi->mpImuPreintegrated) {
+        std::cout << "Not preintegrated measurement" << std::endl;
+        continue;
+      };
 
       pKFi->mpImuPreintegrated->SetNewBias(pKFi->mPrevKF->GetImuBias());
       g2o::HyperGraph::Vertex* VP1 = optimizer.vertex(pKFi->mPrevKF->mnId);
@@ -2974,9 +3011,12 @@ void Optimizer::InertialOptimization(Map* pMap, Eigen::Matrix3d& Rwg, double& sc
 
     if ((pKFi->GetGyroBias() - bg.cast<float>()).norm() > 0.01) {
       pKFi->SetNewBias(b);
-      if (pKFi->mpImuPreintegrated) pKFi->mpImuPreintegrated->Reintegrate();
-    } else
+      if (pKFi->mpImuPreintegrated) {
+        pKFi->mpImuPreintegrated->Reintegrate();
+      }
+    } else {
       pKFi->SetNewBias(b);
+    }
   }
 }
 
@@ -3113,7 +3153,7 @@ void Optimizer::InertialOptimization(Map* pMap, Eigen::Vector3d& bg, Eigen::Vect
   IMU::Bias b(vb[3], vb[4], vb[5], vb[0], vb[1], vb[2]);
 
   // Keyframes velocities and biases
-  const int N = vpKFs.size();
+  const unsigned int N = vpKFs.size();
   for (size_t i = 0; i < N; i++) {
     KeyFrame* pKFi = vpKFs[i];
     if (pKFi->mnId > maxKFid) continue;
@@ -3228,10 +3268,8 @@ void Optimizer::InertialOptimization(Map* pMap, Eigen::Matrix3d& Rwg, double& sc
   optimizer.setVerbose(false);
   optimizer.initializeOptimization();
   optimizer.computeActiveErrors();
-  float err = optimizer.activeRobustChi2();
   optimizer.optimize(its);
   optimizer.computeActiveErrors();
-  float err_end = optimizer.activeRobustChi2();
   // Recover optimized data
   scale = VS->estimate();
   Rwg = VGDir->estimate().Rwg;
@@ -3239,8 +3277,6 @@ void Optimizer::InertialOptimization(Map* pMap, Eigen::Matrix3d& Rwg, double& sc
 
 void Optimizer::LocalBundleAdjustment(KeyFrame* pMainKF, vector<KeyFrame*> vpAdjustKF,
                                       vector<KeyFrame*> vpFixedKF, bool* pbStopFlag) {
-  bool bShowImages = false;
-
   vector<MapPoint*> vpMPs;
 
   g2o::SparseOptimizer optimizer;
@@ -3723,8 +3759,8 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool* pbS
       // Using mnBALocalForKF we avoid redundance here, one MP can not be added
       // several times to lLocalMapPoints
       MapPoint* pMP = *vit;
-      if (pMP)
-        if (!pMP->isBad())
+      if (pMP) {
+        if (!pMP->isBad()) {
           if (pMP->mnBALocalForKF != pCurrKF->mnId) {
             mLocalObs[pMP] = 1;
             lLocalMapPoints.push_back(pMP);
@@ -3732,6 +3768,8 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool* pbS
           } else {
             mLocalObs[pMP]++;
           }
+        }
+      }
     }
   }
 
@@ -3746,7 +3784,9 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool* pbS
   for (vector<pair<MapPoint*, int>>::iterator lit = pairs.begin(), lend = pairs.end(); lit != lend;
        lit++, i++) {
     map<KeyFrame*, tuple<int, int>> observations = lit->first->GetObservations();
-    if (i >= maxCovKF) break;
+    if (i >= maxCovKF) {
+      break;
+    }
     for (map<KeyFrame*, tuple<int, int>>::iterator mit = observations.begin(),
                                                    mend = observations.end();
          mit != mend; mit++) {
@@ -3952,7 +3992,9 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool* pbS
   for (list<MapPoint*>::iterator lit = lLocalMapPoints.begin(), lend = lLocalMapPoints.end();
        lit != lend; lit++) {
     MapPoint* pMP = *lit;
-    if (!pMP) continue;
+    if (!pMP) {
+      continue;
+    }
 
     g2o::VertexSBAPointXYZ* vPoint = new g2o::VertexSBAPointXYZ();
     vPoint->setEstimate(pMP->GetWorldPos().cast<double>());
@@ -3970,16 +4012,21 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool* pbS
          mit != mend; mit++) {
       KeyFrame* pKFi = mit->first;
 
-      if (!pKFi) continue;
-
-      if ((pKFi->mnBALocalForKF != pCurrKF->mnId) && (pKFi->mnBAFixedForKF != pCurrKF->mnId))
+      if (!pKFi) {
         continue;
+      }
+
+      if ((pKFi->mnBALocalForKF != pCurrKF->mnId) && (pKFi->mnBAFixedForKF != pCurrKF->mnId)) {
+        continue;
+      }
 
       if (pKFi->mnId > maxKFid) {
         continue;
       }
 
-      if (optimizer.vertex(id) == NULL || optimizer.vertex(pKFi->mnId) == NULL) continue;
+      if (optimizer.vertex(id) == NULL || optimizer.vertex(pKFi->mnId) == NULL) {
+        continue;
+      }
 
       if (!pKFi->isBad()) {
         const cv::KeyPoint& kpUn = pKFi->mvKeysUn[get<0>(mit->second)];
@@ -4032,10 +4079,15 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool* pbS
     }
   }
 
-  if (pbStopFlag) optimizer.setForceStopFlag(pbStopFlag);
+  if (pbStopFlag) {
+    optimizer.setForceStopFlag(pbStopFlag);
+  }
 
-  if (pbStopFlag)
-    if (*pbStopFlag) return;
+  if (pbStopFlag) {
+    if (*pbStopFlag) {
+      return;
+    }
+  }
 
   optimizer.initializeOptimization();
   optimizer.optimize(8);
@@ -4049,7 +4101,9 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool* pbS
     EdgeMono* e = vpEdgesMono[i];
     MapPoint* pMP = vpMapPointEdgeMono[i];
 
-    if (pMP->isBad()) continue;
+    if (pMP->isBad()) {
+      continue;
+    }
 
     if (e->chi2() > chi2Mono2) {
       KeyFrame* pKFi = vpEdgeKFMono[i];
@@ -4062,7 +4116,9 @@ void Optimizer::MergeInertialBA(KeyFrame* pCurrKF, KeyFrame* pMergeKF, bool* pbS
     EdgeStereo* e = vpEdgesStereo[i];
     MapPoint* pMP = vpMapPointEdgeStereo[i];
 
-    if (pMP->isBad()) continue;
+    if (pMP->isBad()) {
+      continue;
+    }
 
     if (e->chi2() > chi2Stereo2) {
       KeyFrame* pKFi = vpEdgeKFStereo[i];
@@ -4208,10 +4264,11 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame* pFrame, bool bRecInit
 
         // Left monocular observation
         if ((!bRight && pFrame->mvuRight[i] < 0) || i < Nleft) {
-          if (i < Nleft)  // pair left-right
+          if (i < Nleft) {  // pair left-right
             kpUn = pFrame->mvKeys[i];
-          else
+          } else {
             kpUn = pFrame->mvKeysUn[i];
+          }
 
           nInitialMonoCorrespondences++;
           pFrame->mvbOutlier[i] = false;
@@ -4397,7 +4454,9 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame* pFrame, bool bRecInit
         nInliersMono++;
       }
 
-      if (it == 2) e->setRobustKernel(0);
+      if (it == 2) {
+        e->setRobustKernel(0);
+      }
     }
 
     // For stereo observations
@@ -4422,7 +4481,9 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame* pFrame, bool bRecInit
         nInliersStereo++;
       }
 
-      if (it == 2) e->setRobustKernel(0);
+      if (it == 2) {
+        e->setRobustKernel(0);
+      }
     }
 
     nInliers = nInliersMono + nInliersStereo;
@@ -5168,7 +5229,9 @@ void Optimizer::OptimizeEssentialGraph4DoF(Map* pMap, KeyFrame* pLoopKF, KeyFram
   for (size_t i = 0, iend = vpMPs.size(); i < iend; i++) {
     MapPoint* pMP = vpMPs[i];
 
-    if (pMP->isBad()) continue;
+    if (pMP->isBad()) {
+      continue;
+    }
 
     int nIDr;
 

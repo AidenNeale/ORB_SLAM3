@@ -49,8 +49,8 @@ class LoopClosing {
       KeyFrameAndPose;
 
  public:
-  LoopClosing(Atlas* pAtlas, KeyFrameDatabase* pDB, ORBVocabulary* pVoc,
-              const bool bFixScale, const bool bActiveLC);
+  LoopClosing(Atlas* pAtlas, KeyFrameDatabase* pDB, ORBVocabulary* pVoc, const bool bFixScale,
+              const bool bActiveLC);
 
   void SetTracker(Tracking* pTracker);
 
@@ -119,31 +119,22 @@ class LoopClosing {
 
   // Methods to implement the new place recognition algorithm
   bool NewDetectCommonRegions();
-  bool DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF,
-                                      KeyFrame* pMatchedKF, g2o::Sim3& gScw,
-                                      int& nNumProjMatches,
-                                      std::vector<MapPoint*>& vpMPs,
+  bool DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame* pMatchedKF, g2o::Sim3& gScw,
+                                      int& nNumProjMatches, std::vector<MapPoint*>& vpMPs,
                                       std::vector<MapPoint*>& vpMatchedMPs);
-  bool DetectCommonRegionsFromBoW(std::vector<KeyFrame*>& vpBowCand,
-                                  KeyFrame*& pMatchedKF,
+  bool DetectCommonRegionsFromBoW(std::vector<KeyFrame*>& vpBowCand, KeyFrame*& pMatchedKF,
                                   KeyFrame*& pLastCurrentKF, g2o::Sim3& g2oScw,
-                                  int& nNumCoincidences,
-                                  std::vector<MapPoint*>& vpMPs,
+                                  int& nNumCoincidences, std::vector<MapPoint*>& vpMPs,
                                   std::vector<MapPoint*>& vpMatchedMPs);
-  bool DetectCommonRegionsFromLastKF(KeyFrame* pCurrentKF, KeyFrame* pMatchedKF,
-                                     g2o::Sim3& gScw, int& nNumProjMatches,
-                                     std::vector<MapPoint*>& vpMPs,
+  bool DetectCommonRegionsFromLastKF(KeyFrame* pCurrentKF, KeyFrame* pMatchedKF, g2o::Sim3& gScw,
+                                     int& nNumProjMatches, std::vector<MapPoint*>& vpMPs,
                                      std::vector<MapPoint*>& vpMatchedMPs);
-  int FindMatchesByProjection(KeyFrame* pCurrentKF, KeyFrame* pMatchedKFw,
-                              g2o::Sim3& g2oScw,
-                              set<MapPoint*>& spMatchedMPinOrigin,
-                              vector<MapPoint*>& vpMapPoints,
+  int FindMatchesByProjection(KeyFrame* pCurrentKF, KeyFrame* pMatchedKFw, g2o::Sim3& g2oScw,
+                              set<MapPoint*>& spMatchedMPinOrigin, vector<MapPoint*>& vpMapPoints,
                               vector<MapPoint*>& vpMatchedMapPoints);
 
-  void SearchAndFuse(const KeyFrameAndPose& CorrectedPosesMap,
-                     vector<MapPoint*>& vpMapPoints);
-  void SearchAndFuse(const vector<KeyFrame*>& vConectedKFs,
-                     vector<MapPoint*>& vpMapPoints);
+  void SearchAndFuse(const KeyFrameAndPose& CorrectedPosesMap, vector<MapPoint*>& vpMapPoints);
+  void SearchAndFuse(const vector<KeyFrame*>& vConectedKFs, vector<MapPoint*>& vpMapPoints);
 
   void CorrectLoop();
 

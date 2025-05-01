@@ -42,15 +42,13 @@ class Pinhole : public GeometricCamera {
     mnId = nNextId++;
     mnType = CAM_PINHOLE;
   }
-  Pinhole(const std::vector<float> _vParameters)
-      : GeometricCamera(_vParameters), tvr(nullptr) {
+  Pinhole(const std::vector<float> _vParameters) : GeometricCamera(_vParameters), tvr(nullptr) {
     assert(mvParameters.size() == 4);
     mnId = nNextId++;
     mnType = CAM_PINHOLE;
   }
 
-  Pinhole(Pinhole* pPinhole)
-      : GeometricCamera(pPinhole->mvParameters), tvr(nullptr) {
+  Pinhole(Pinhole* pPinhole) : GeometricCamera(pPinhole->mvParameters), tvr(nullptr) {
     assert(mvParameters.size() == 4);
     mnId = nNextId++;
     mnType = CAM_PINHOLE;
@@ -74,23 +72,19 @@ class Pinhole : public GeometricCamera {
 
   bool ReconstructWithTwoViews(const std::vector<cv::KeyPoint>& vKeys1,
                                const std::vector<cv::KeyPoint>& vKeys2,
-                               const std::vector<int>& vMatches12,
-                               Sophus::SE3f& T21,
-                               std::vector<cv::Point3f>& vP3D,
-                               std::vector<bool>& vbTriangulated);
+                               const std::vector<int>& vMatches12, Sophus::SE3f& T21,
+                               std::vector<cv::Point3f>& vP3D, std::vector<bool>& vbTriangulated);
 
   cv::Mat toK();
   Eigen::Matrix3f toK_();
 
   bool epipolarConstrain(GeometricCamera* pCamera2, const cv::KeyPoint& kp1,
                          const cv::KeyPoint& kp2, const Eigen::Matrix3f& R12,
-                         const Eigen::Vector3f& t12, const float sigmaLevel,
-                         const float unc);
+                         const Eigen::Vector3f& t12, const float sigmaLevel, const float unc);
 
   bool matchAndtriangulate(const cv::KeyPoint& kp1, const cv::KeyPoint& kp2,
-                           GeometricCamera* pOther, Sophus::SE3f& Tcw1,
-                           Sophus::SE3f& Tcw2, const float sigmaLevel1,
-                           const float sigmaLevel2,
+                           GeometricCamera* pOther, Sophus::SE3f& Tcw1, Sophus::SE3f& Tcw2,
+                           const float sigmaLevel1, const float sigmaLevel2,
                            Eigen::Vector3f& x3Dtriangulated) {
     return false;
   }

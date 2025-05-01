@@ -36,8 +36,7 @@ Atlas::Atlas(int initKFid) : mnLastInitKFidMap(initKFid), mHasViewer(false) {
 }
 
 Atlas::~Atlas() {
-  for (std::set<Map*>::iterator it = mspMaps.begin(), end = mspMaps.end();
-       it != end;) {
+  for (std::set<Map*>::iterator it = mspMaps.begin(), end = mspMaps.end(); it != end;) {
     Map* pMi = *it;
 
     if (pMi) {
@@ -55,8 +54,8 @@ void Atlas::CreateNewMap() {
   cout << "Creation of new map with id: " << Map::nNextId << endl;
   if (mpCurrentMap) {
     if (!mspMaps.empty() && mnLastInitKFidMap < mpCurrentMap->GetMaxKFid())
-      mnLastInitKFidMap = mpCurrentMap->GetMaxKFid() +
-                          1;  // The init KF is the next of current maximum
+      mnLastInitKFidMap =
+          mpCurrentMap->GetMaxKFid() + 1;  // The init KF is the next of current maximum
 
     mpCurrentMap->SetStoredMap();
     cout << "Stored map with ID: " << mpCurrentMap->GetId() << endl;
@@ -178,9 +177,7 @@ std::vector<MapPoint*> Atlas::GetReferenceMapPoints() {
 vector<Map*> Atlas::GetAllMaps() {
   unique_lock<mutex> lock(mMutexAtlas);
   struct compFunctor {
-    inline bool operator()(Map* elem1, Map* elem2) {
-      return elem1->GetId() < elem2->GetId();
-    }
+    inline bool operator()(Map* elem1, Map* elem2) { return elem1->GetId() < elem2->GetId(); }
   };
   vector<Map*> vMaps(mspMaps.begin(), mspMaps.end());
   sort(vMaps.begin(), vMaps.end(), compFunctor());
@@ -257,14 +254,12 @@ bool Atlas::isImuInitialized() {
 void Atlas::PreSave() {
   if (mpCurrentMap) {
     if (!mspMaps.empty() && mnLastInitKFidMap < mpCurrentMap->GetMaxKFid())
-      mnLastInitKFidMap = mpCurrentMap->GetMaxKFid() +
-                          1;  // The init KF is the next of current maximum
+      mnLastInitKFidMap =
+          mpCurrentMap->GetMaxKFid() + 1;  // The init KF is the next of current maximum
   }
 
   struct compFunctor {
-    inline bool operator()(Map* elem1, Map* elem2) {
-      return elem1->GetId() < elem2->GetId();
-    }
+    inline bool operator()(Map* elem1, Map* elem2) { return elem1->GetId() < elem2->GetId(); }
   };
   std::copy(mspMaps.begin(), mspMaps.end(), std::back_inserter(mvpBackupMaps));
   sort(mvpBackupMaps.begin(), mvpBackupMaps.end(), compFunctor());
@@ -300,15 +295,11 @@ void Atlas::PostLoad() {
   mvpBackupMaps.clear();
 }
 
-void Atlas::SetKeyFrameDababase(KeyFrameDatabase* pKFDB) {
-  mpKeyFrameDB = pKFDB;
-}
+void Atlas::SetKeyFrameDababase(KeyFrameDatabase* pKFDB) { mpKeyFrameDB = pKFDB; }
 
 KeyFrameDatabase* Atlas::GetKeyFrameDatabase() { return mpKeyFrameDB; }
 
-void Atlas::SetORBVocabulary(ORBVocabulary* pORBVoc) {
-  mpORBVocabulary = pORBVoc;
-}
+void Atlas::SetORBVocabulary(ORBVocabulary* pORBVoc) { mpORBVocabulary = pORBVoc; }
 
 ORBVocabulary* Atlas::GetORBVocabulary() { return mpORBVocabulary; }
 

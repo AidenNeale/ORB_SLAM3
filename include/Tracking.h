@@ -55,10 +55,9 @@ class Settings;
 class Tracking {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer,
-           MapDrawer* pMapDrawer, Atlas* pAtlas, KeyFrameDatabase* pKFDB,
-           const string& strSettingPath, const int sensor, Settings* settings,
-           const string& _nameSeq = std::string());
+  Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer,
+           Atlas* pAtlas, KeyFrameDatabase* pKFDB, const string& strSettingPath, const int sensor,
+           Settings* settings, const string& _nameSeq = std::string());
 
   ~Tracking();
 
@@ -69,13 +68,11 @@ class Tracking {
 
   // Preprocess the input and call Track(). Extract features and performs stereo
   // matching.
-  Sophus::SE3f GrabImageStereo(const cv::Mat& imRectLeft,
-                               const cv::Mat& imRectRight,
+  Sophus::SE3f GrabImageStereo(const cv::Mat& imRectLeft, const cv::Mat& imRectRight,
                                const double& timestamp, string filename);
-  Sophus::SE3f GrabImageRGBD(const cv::Mat& imRGB, const cv::Mat& imD,
-                             const double& timestamp, string filename);
-  Sophus::SE3f GrabImageMonocular(const cv::Mat& im, const double& timestamp,
-                                  string filename);
+  Sophus::SE3f GrabImageRGBD(const cv::Mat& imRGB, const cv::Mat& imD, const double& timestamp,
+                             string filename);
+  Sophus::SE3f GrabImageMonocular(const cv::Mat& im, const double& timestamp, string filename);
 
   void GrabImuData(const IMU::Point& imuMeasurement);
 
@@ -94,8 +91,7 @@ class Tracking {
   // to localize the camera.
   void InformOnlyTracking(const bool& flag);
 
-  void UpdateFrameIMU(const float s, const IMU::Bias& b,
-                      KeyFrame* pCurrentKeyFrame);
+  void UpdateFrameIMU(const float s, const IMU::Bias& b, KeyFrame* pCurrentKeyFrame);
   KeyFrame* GetLastKeyFrame() { return mpLastKeyFrame; }
 
   void CreateMapInAtlas();
@@ -107,10 +103,8 @@ class Tracking {
   int GetMatchesInliers();
 
   // DEBUG
-  void SaveSubTrajectory(string strNameFile_frames, string strNameFile_kf,
-                         string strFolder = "");
-  void SaveSubTrajectory(string strNameFile_frames, string strNameFile_kf,
-                         Map* pMap);
+  void SaveSubTrajectory(string strNameFile_frames, string strNameFile_kf, string strFolder = "");
+  void SaveSubTrajectory(string strNameFile_frames, string strNameFile_kf, Map* pMap);
 
   float GetImageScale();
 

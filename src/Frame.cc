@@ -146,12 +146,10 @@ Frame::Frame(const Frame &frame)
 #endif
 }
 
-Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
-             const double &timeStamp, ORBextractor *extractorLeft,
-             ORBextractor *extractorRight, ORBVocabulary *voc, cv::Mat &K,
-             cv::Mat &distCoef, const float &bf, const float &thDepth,
-             GeometricCamera *pCamera, Frame *pPrevF,
-             const IMU::Calib &ImuCalib)
+Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp,
+             ORBextractor *extractorLeft, ORBextractor *extractorRight, ORBVocabulary *voc,
+             cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth,
+             GeometricCamera *pCamera, Frame *pPrevF, const IMU::Calib &ImuCalib)
     : mpcpi(NULL),
       mpORBvocabulary(voc),
       mpORBextractorLeft(extractorLeft),
@@ -187,21 +185,18 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
 
   // ORB extraction
 #ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_StartExtORB =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point time_StartExtORB = std::chrono::steady_clock::now();
 #endif
   thread threadLeft(&Frame::ExtractORB, this, 0, imLeft, 0, 0);
   thread threadRight(&Frame::ExtractORB, this, 1, imRight, 0, 0);
   threadLeft.join();
   threadRight.join();
 #ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_EndExtORB =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point time_EndExtORB = std::chrono::steady_clock::now();
 
-  mTimeORB_Ext =
-      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-          time_EndExtORB - time_StartExtORB)
-          .count();
+  mTimeORB_Ext = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
+                     time_EndExtORB - time_StartExtORB)
+                     .count();
 #endif
 
   N = mvKeys.size();
@@ -210,18 +205,15 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
   UndistortKeyPoints();
 
 #ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_StartStereoMatches =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point time_StartStereoMatches = std::chrono::steady_clock::now();
 #endif
   ComputeStereoMatches();
 #ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_EndStereoMatches =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point time_EndStereoMatches = std::chrono::steady_clock::now();
 
-  mTimeStereoMatch =
-      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-          time_EndStereoMatches - time_StartStereoMatches)
-          .count();
+  mTimeStereoMatch = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
+                         time_EndStereoMatches - time_StartStereoMatches)
+                         .count();
 #endif
 
   mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
@@ -234,10 +226,8 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
   if (mbInitialComputations) {
     ComputeImageBounds(imLeft);
 
-    mfGridElementWidthInv =
-        static_cast<float>(FRAME_GRID_COLS) / (mnMaxX - mnMinX);
-    mfGridElementHeightInv =
-        static_cast<float>(FRAME_GRID_ROWS) / (mnMaxY - mnMinY);
+    mfGridElementWidthInv = static_cast<float>(FRAME_GRID_COLS) / (mnMaxX - mnMinX);
+    mfGridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) / (mnMaxY - mnMinY);
 
     fx = K.at<float>(0, 0);
     fy = K.at<float>(1, 1);
@@ -271,10 +261,9 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
   AssignFeaturesToGrid();
 }
 
-Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
-             const double &timeStamp, ORBextractor *extractor,
-             ORBVocabulary *voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
-             const float &thDepth, GeometricCamera *pCamera, Frame *pPrevF,
+Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeStamp,
+             ORBextractor *extractor, ORBVocabulary *voc, cv::Mat &K, cv::Mat &distCoef,
+             const float &bf, const float &thDepth, GeometricCamera *pCamera, Frame *pPrevF,
              const IMU::Calib &ImuCalib)
     : mpcpi(NULL),
       mpORBvocabulary(voc),
@@ -311,18 +300,15 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   // ORB extraction
 #ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_StartExtORB =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point time_StartExtORB = std::chrono::steady_clock::now();
 #endif
   ExtractORB(0, imGray, 0, 0);
 #ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_EndExtORB =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point time_EndExtORB = std::chrono::steady_clock::now();
 
-  mTimeORB_Ext =
-      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-          time_EndExtORB - time_StartExtORB)
-          .count();
+  mTimeORB_Ext = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
+                     time_EndExtORB - time_StartExtORB)
+                     .count();
 #endif
 
   N = mvKeys.size();
@@ -345,10 +331,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   if (mbInitialComputations) {
     ComputeImageBounds(imGray);
 
-    mfGridElementWidthInv = static_cast<float>(FRAME_GRID_COLS) /
-                            static_cast<float>(mnMaxX - mnMinX);
-    mfGridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) /
-                             static_cast<float>(mnMaxY - mnMinY);
+    mfGridElementWidthInv =
+        static_cast<float>(FRAME_GRID_COLS) / static_cast<float>(mnMaxX - mnMinX);
+    mfGridElementHeightInv =
+        static_cast<float>(FRAME_GRID_ROWS) / static_cast<float>(mnMaxY - mnMinY);
 
     fx = K.at<float>(0, 0);
     fy = K.at<float>(1, 1);
@@ -382,9 +368,8 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   AssignFeaturesToGrid();
 }
 
-Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
-             ORBextractor *extractor, ORBVocabulary *voc,
-             GeometricCamera *pCamera, cv::Mat &distCoef, const float &bf,
+Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor *extractor,
+             ORBVocabulary *voc, GeometricCamera *pCamera, cv::Mat &distCoef, const float &bf,
              const float &thDepth, Frame *pPrevF, const IMU::Calib &ImuCalib)
     : mpcpi(NULL),
       mpORBvocabulary(voc),
@@ -421,18 +406,15 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
 
   // ORB extraction
 #ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_StartExtORB =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point time_StartExtORB = std::chrono::steady_clock::now();
 #endif
   ExtractORB(0, imGray, 0, 1000);
 #ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_EndExtORB =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point time_EndExtORB = std::chrono::steady_clock::now();
 
-  mTimeORB_Ext =
-      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-          time_EndExtORB - time_StartExtORB)
-          .count();
+  mTimeORB_Ext = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
+                     time_EndExtORB - time_StartExtORB)
+                     .count();
 #endif
 
   N = mvKeys.size();
@@ -458,10 +440,10 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
   if (mbInitialComputations) {
     ComputeImageBounds(imGray);
 
-    mfGridElementWidthInv = static_cast<float>(FRAME_GRID_COLS) /
-                            static_cast<float>(mnMaxX - mnMinX);
-    mfGridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) /
-                             static_cast<float>(mnMaxY - mnMinY);
+    mfGridElementWidthInv =
+        static_cast<float>(FRAME_GRID_COLS) / static_cast<float>(mnMaxX - mnMinX);
+    mfGridElementHeightInv =
+        static_cast<float>(FRAME_GRID_ROWS) / static_cast<float>(mnMaxY - mnMinY);
 
     fx = static_cast<Pinhole *>(mpCamera)->toK().at<float>(0, 0);
     fy = static_cast<Pinhole *>(mpCamera)->toK().at<float>(1, 1);
@@ -526,15 +508,12 @@ void Frame::AssignFeaturesToGrid() {
   }
 }
 
-void Frame::ExtractORB(int flag, const cv::Mat &im, const int x0,
-                       const int x1) {
+void Frame::ExtractORB(int flag, const cv::Mat &im, const int x0, const int x1) {
   vector<int> vLapping = {x0, x1};
   if (flag == 0)
-    monoLeft =
-        (*mpORBextractorLeft)(im, cv::Mat(), mvKeys, mDescriptors, vLapping);
+    monoLeft = (*mpORBextractorLeft)(im, cv::Mat(), mvKeys, mDescriptors, vLapping);
   else
-    monoRight = (*mpORBextractorRight)(im, cv::Mat(), mvKeysRight,
-                                       mDescriptorsRight, vLapping);
+    monoRight = (*mpORBextractorRight)(im, cv::Mat(), mvKeysRight, mDescriptorsRight, vLapping);
 }
 
 bool Frame::isSet() const { return mbIsSet; }
@@ -559,8 +538,7 @@ void Frame::SetVelocity(Eigen::Vector3f Vwb) {
 
 Eigen::Vector3f Frame::GetVelocity() const { return mVw; }
 
-void Frame::SetImuPoseVelocity(const Eigen::Matrix3f &Rwb,
-                               const Eigen::Vector3f &twb,
+void Frame::SetImuPoseVelocity(const Eigen::Matrix3f &Rwb, const Eigen::Vector3f &twb,
                                const Eigen::Vector3f &Vwb) {
   mVw = Vwb;
   mbHasVelocity = true;
@@ -591,21 +569,15 @@ Eigen::Matrix<float, 3, 3> Frame::GetImuRotation() {
   return mRwc * mImuCalib.mTcb.rotationMatrix();
 }
 
-Sophus::SE3<float> Frame::GetImuPose() {
-  return mTcw.inverse() * mImuCalib.mTcb;
-}
+Sophus::SE3<float> Frame::GetImuPose() { return mTcw.inverse() * mImuCalib.mTcb; }
 
 Sophus::SE3f Frame::GetRelativePoseTrl() { return mTrl; }
 
 Sophus::SE3f Frame::GetRelativePoseTlr() { return mTlr; }
 
-Eigen::Matrix3f Frame::GetRelativePoseTlr_rotation() {
-  return mTlr.rotationMatrix();
-}
+Eigen::Matrix3f Frame::GetRelativePoseTlr_rotation() { return mTlr.rotationMatrix(); }
 
-Eigen::Vector3f Frame::GetRelativePoseTlr_translation() {
-  return mTlr.translation();
-}
+Eigen::Vector3f Frame::GetRelativePoseTlr_translation() { return mTlr.translation(); }
 
 bool Frame::isInFrustum(MapPoint *pMP, float viewingCosLimit) {
   if (Nleft == -1) {
@@ -676,8 +648,7 @@ bool Frame::isInFrustum(MapPoint *pMP, float viewingCosLimit) {
   }
 }
 
-bool Frame::ProjectPointDistort(MapPoint *pMP, cv::Point2f &kp, float &u,
-                                float &v) {
+bool Frame::ProjectPointDistort(MapPoint *pMP, cv::Point2f &kp, float &u, float &v) {
   // 3D in absolute coordinates
   Eigen::Vector3f P = pMP->GetWorldPos();
 
@@ -734,13 +705,10 @@ bool Frame::ProjectPointDistort(MapPoint *pMP, cv::Point2f &kp, float &u,
   return true;
 }
 
-Eigen::Vector3f Frame::inRefCoordinates(Eigen::Vector3f pCw) {
-  return mRcw * pCw + mtcw;
-}
+Eigen::Vector3f Frame::inRefCoordinates(Eigen::Vector3f pCw) { return mRcw * pCw + mtcw; }
 
-vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y,
-                                        const float &r, const int minLevel,
-                                        const int maxLevel,
+vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y, const float &r,
+                                        const int minLevel, const int maxLevel,
                                         const bool bRight) const {
   vector<size_t> vIndices;
   vIndices.reserve(N);
@@ -748,28 +716,24 @@ vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y,
   float factorX = r;
   float factorY = r;
 
-  const int nMinCellX =
-      max(0, (int)floor((x - mnMinX - factorX) * mfGridElementWidthInv));
+  const int nMinCellX = max(0, (int)floor((x - mnMinX - factorX) * mfGridElementWidthInv));
   if (nMinCellX >= FRAME_GRID_COLS) {
     return vIndices;
   }
 
   const int nMaxCellX =
-      min((int)FRAME_GRID_COLS - 1,
-          (int)ceil((x - mnMinX + factorX) * mfGridElementWidthInv));
+      min((int)FRAME_GRID_COLS - 1, (int)ceil((x - mnMinX + factorX) * mfGridElementWidthInv));
   if (nMaxCellX < 0) {
     return vIndices;
   }
 
-  const int nMinCellY =
-      max(0, (int)floor((y - mnMinY - factorY) * mfGridElementHeightInv));
+  const int nMinCellY = max(0, (int)floor((y - mnMinY - factorY) * mfGridElementHeightInv));
   if (nMinCellY >= FRAME_GRID_ROWS) {
     return vIndices;
   }
 
   const int nMaxCellY =
-      min((int)FRAME_GRID_ROWS - 1,
-          (int)ceil((y - mnMinY + factorY) * mfGridElementHeightInv));
+      min((int)FRAME_GRID_ROWS - 1, (int)ceil((y - mnMinY + factorY) * mfGridElementHeightInv));
   if (nMaxCellY < 0) {
     return vIndices;
   }
@@ -778,8 +742,7 @@ vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y,
 
   for (int ix = nMinCellX; ix <= nMaxCellX; ix++) {
     for (int iy = nMinCellY; iy <= nMaxCellY; iy++) {
-      const vector<size_t> vCell =
-          (!bRight) ? mGrid[ix][iy] : mGridRight[ix][iy];
+      const vector<size_t> vCell = (!bRight) ? mGrid[ix][iy] : mGridRight[ix][iy];
       if (vCell.empty()) continue;
 
       for (size_t j = 0, jend = vCell.size(); j < jend; j++) {
@@ -795,8 +758,7 @@ vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y,
         const float distx = kpUn.pt.x - x;
         const float disty = kpUn.pt.y - y;
 
-        if (fabs(distx) < factorX && fabs(disty) < factorY)
-          vIndices.push_back(vCell[j]);
+        if (fabs(distx) < factorX && fabs(disty) < factorY) vIndices.push_back(vCell[j]);
       }
     }
   }
@@ -810,9 +772,7 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
 
   // Keypoint's coordinates are undistorted, which could cause to go out of the
   // image
-  if (posX < 0 || posX >= FRAME_GRID_COLS || posY < 0 ||
-      posY >= FRAME_GRID_ROWS)
-    return false;
+  if (posX < 0 || posX >= FRAME_GRID_COLS || posY < 0 || posY >= FRAME_GRID_ROWS) return false;
 
   return true;
 }
@@ -840,8 +800,7 @@ void Frame::UndistortKeyPoints() {
 
   // Undistort points
   mat = mat.reshape(2);
-  cv::undistortPoints(mat, mat, static_cast<Pinhole *>(mpCamera)->toK(),
-                      mDistCoef, cv::Mat(), mK);
+  cv::undistortPoints(mat, mat, static_cast<Pinhole *>(mpCamera)->toK(), mDistCoef, cv::Mat(), mK);
   mat = mat.reshape(1);
 
   // Fill undistorted keypoint vector
@@ -867,8 +826,8 @@ void Frame::ComputeImageBounds(const cv::Mat &imLeft) {
     mat.at<float>(3, 1) = imLeft.rows;
 
     mat = mat.reshape(2);
-    cv::undistortPoints(mat, mat, static_cast<Pinhole *>(mpCamera)->toK(),
-                        mDistCoef, cv::Mat(), mK);
+    cv::undistortPoints(mat, mat, static_cast<Pinhole *>(mpCamera)->toK(), mDistCoef, cv::Mat(),
+                        mK);
     mat = mat.reshape(1);
 
     // Undistort corners
@@ -981,15 +940,12 @@ void Frame::ComputeStereoMatches() {
 
       const float iniu = scaleduR0 + L - w;
       const float endu = scaleduR0 + L + w + 1;
-      if (iniu < 0 ||
-          endu >= mpORBextractorRight->mvImagePyramid[kpL.octave].cols)
-        continue;
+      if (iniu < 0 || endu >= mpORBextractorRight->mvImagePyramid[kpL.octave].cols) continue;
 
       for (int incR = -L; incR <= +L; incR++) {
-        cv::Mat IR =
-            mpORBextractorRight->mvImagePyramid[kpL.octave]
-                .rowRange(scaledvL - w, scaledvL + w + 1)
-                .colRange(scaleduR0 + incR - w, scaleduR0 + incR + w + 1);
+        cv::Mat IR = mpORBextractorRight->mvImagePyramid[kpL.octave]
+                         .rowRange(scaledvL - w, scaledvL + w + 1)
+                         .colRange(scaleduR0 + incR - w, scaleduR0 + incR + w + 1);
 
         float dist = cv::norm(IL, IR, cv::NORM_L1);
         if (dist < bestDist) {
@@ -1007,14 +963,12 @@ void Frame::ComputeStereoMatches() {
       const float dist2 = vDists[L + bestincR];
       const float dist3 = vDists[L + bestincR + 1];
 
-      const float deltaR =
-          (dist1 - dist3) / (2.0f * (dist1 + dist3 - 2.0f * dist2));
+      const float deltaR = (dist1 - dist3) / (2.0f * (dist1 + dist3 - 2.0f * dist2));
 
       if (deltaR < -1 || deltaR > 1) continue;
 
       // Re-scaled coordinate
-      float bestuR = mvScaleFactors[kpL.octave] *
-                     ((float)scaleduR0 + (float)bestincR + deltaR);
+      float bestuR = mvScaleFactors[kpL.octave] * ((float)scaleduR0 + (float)bestincR + deltaR);
 
       float disparity = (uL - bestuR);
 
@@ -1088,12 +1042,11 @@ void Frame::setIntegrated() {
   mbImuPreintegrated = true;
 }
 
-Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
-             const double &timeStamp, ORBextractor *extractorLeft,
-             ORBextractor *extractorRight, ORBVocabulary *voc, cv::Mat &K,
-             cv::Mat &distCoef, const float &bf, const float &thDepth,
-             GeometricCamera *pCamera, GeometricCamera *pCamera2,
-             Sophus::SE3f &Tlr, Frame *pPrevF, const IMU::Calib &ImuCalib)
+Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp,
+             ORBextractor *extractorLeft, ORBextractor *extractorRight, ORBVocabulary *voc,
+             cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth,
+             GeometricCamera *pCamera, GeometricCamera *pCamera2, Sophus::SE3f &Tlr, Frame *pPrevF,
+             const IMU::Calib &ImuCalib)
     : mpcpi(NULL),
       mpORBvocabulary(voc),
       mpORBextractorLeft(extractorLeft),
@@ -1133,26 +1086,22 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
 
   // ORB extraction
 #ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_StartExtORB =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point time_StartExtORB = std::chrono::steady_clock::now();
 #endif
   thread threadLeft(&Frame::ExtractORB, this, 0, imLeft,
                     static_cast<KannalaBrandt8 *>(mpCamera)->mvLappingArea[0],
                     static_cast<KannalaBrandt8 *>(mpCamera)->mvLappingArea[1]);
-  thread threadRight(
-      &Frame::ExtractORB, this, 1, imRight,
-      static_cast<KannalaBrandt8 *>(mpCamera2)->mvLappingArea[0],
-      static_cast<KannalaBrandt8 *>(mpCamera2)->mvLappingArea[1]);
+  thread threadRight(&Frame::ExtractORB, this, 1, imRight,
+                     static_cast<KannalaBrandt8 *>(mpCamera2)->mvLappingArea[0],
+                     static_cast<KannalaBrandt8 *>(mpCamera2)->mvLappingArea[1]);
   threadLeft.join();
   threadRight.join();
 #ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_EndExtORB =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point time_EndExtORB = std::chrono::steady_clock::now();
 
-  mTimeORB_Ext =
-      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-          time_EndExtORB - time_StartExtORB)
-          .count();
+  mTimeORB_Ext = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
+                     time_EndExtORB - time_StartExtORB)
+                     .count();
 #endif
 
   Nleft = mvKeys.size();
@@ -1166,10 +1115,8 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
   if (mbInitialComputations) {
     ComputeImageBounds(imLeft);
 
-    mfGridElementWidthInv =
-        static_cast<float>(FRAME_GRID_COLS) / (mnMaxX - mnMinX);
-    mfGridElementHeightInv =
-        static_cast<float>(FRAME_GRID_ROWS) / (mnMaxY - mnMinY);
+    mfGridElementWidthInv = static_cast<float>(FRAME_GRID_COLS) / (mnMaxX - mnMinX);
+    mfGridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) / (mnMaxY - mnMinY);
 
     fx = K.at<float>(0, 0);
     fy = K.at<float>(1, 1);
@@ -1190,18 +1137,15 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
   mtlr = mTlr.translation();
 
 #ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_StartStereoMatches =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point time_StartStereoMatches = std::chrono::steady_clock::now();
 #endif
   ComputeStereoFishEyeMatches();
 #ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_EndStereoMatches =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point time_EndStereoMatches = std::chrono::steady_clock::now();
 
-  mTimeStereoMatch =
-      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-          time_EndStereoMatches - time_StartStereoMatches)
-          .count();
+  mTimeStereoMatch = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
+                         time_EndStereoMatches - time_StartStereoMatches)
+                         .count();
 #endif
 
   // Put all descriptors in the same matrix
@@ -1220,12 +1164,10 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
 void Frame::ComputeStereoFishEyeMatches() {
   // Speed it up by matching keypoints in the lapping area
   vector<cv::KeyPoint> stereoLeft(mvKeys.begin() + monoLeft, mvKeys.end());
-  vector<cv::KeyPoint> stereoRight(mvKeysRight.begin() + monoRight,
-                                   mvKeysRight.end());
+  vector<cv::KeyPoint> stereoRight(mvKeysRight.begin() + monoRight, mvKeysRight.end());
 
   cv::Mat stereoDescLeft = mDescriptors.rowRange(monoLeft, mDescriptors.rows);
-  cv::Mat stereoDescRight =
-      mDescriptorsRight.rowRange(monoRight, mDescriptorsRight.rows);
+  cv::Mat stereoDescRight = mDescriptorsRight.rowRange(monoRight, mDescriptorsRight.rows);
 
   mvLeftToRightMatch = vector<int>(Nleft, -1);
   mvRightToLeftMatch = vector<int>(Nright, -1);
@@ -1243,26 +1185,20 @@ void Frame::ComputeStereoFishEyeMatches() {
   int descMatches = 0;
 
   // Check matches using Lowe's ratio
-  for (vector<vector<cv::DMatch>>::iterator it = matches.begin();
-       it != matches.end(); ++it) {
+  for (vector<vector<cv::DMatch>>::iterator it = matches.begin(); it != matches.end(); ++it) {
     if ((*it).size() >= 2 && (*it)[0].distance < (*it)[1].distance * 0.7) {
       // For every good match, check parallax and reprojection error to discard
       // spurious matches
       Eigen::Vector3f p3D;
       descMatches++;
-      float
-          sigma1 = mvLevelSigma2[mvKeys[(*it)[0].queryIdx + monoLeft].octave],
-          sigma2 =
-              mvLevelSigma2[mvKeysRight[(*it)[0].trainIdx + monoRight].octave];
+      float sigma1 = mvLevelSigma2[mvKeys[(*it)[0].queryIdx + monoLeft].octave],
+            sigma2 = mvLevelSigma2[mvKeysRight[(*it)[0].trainIdx + monoRight].octave];
       float depth = static_cast<KannalaBrandt8 *>(mpCamera)->TriangulateMatches(
           mpCamera2, mvKeys[(*it)[0].queryIdx + monoLeft],
-          mvKeysRight[(*it)[0].trainIdx + monoRight], mRlr, mtlr, sigma1,
-          sigma2, p3D);
+          mvKeysRight[(*it)[0].trainIdx + monoRight], mRlr, mtlr, sigma1, sigma2, p3D);
       if (depth > 0.0001f) {
-        mvLeftToRightMatch[(*it)[0].queryIdx + monoLeft] =
-            (*it)[0].trainIdx + monoRight;
-        mvRightToLeftMatch[(*it)[0].trainIdx + monoRight] =
-            (*it)[0].queryIdx + monoLeft;
+        mvLeftToRightMatch[(*it)[0].queryIdx + monoLeft] = (*it)[0].trainIdx + monoRight;
+        mvRightToLeftMatch[(*it)[0].trainIdx + monoRight] = (*it)[0].queryIdx + monoLeft;
         mvStereo3Dpoints[(*it)[0].queryIdx + monoLeft] = p3D;
         mvDepth[(*it)[0].queryIdx + monoLeft] = depth;
         nMatches++;
@@ -1271,8 +1207,7 @@ void Frame::ComputeStereoFishEyeMatches() {
   }
 }
 
-bool Frame::isInFrustumChecks(MapPoint *pMP, float viewingCosLimit,
-                              bool bRight) {
+bool Frame::isInFrustumChecks(MapPoint *pMP, float viewingCosLimit, bool bRight) {
   // 3D in absolute coordinates
   Eigen::Vector3f P = pMP->GetWorldPos();
 
