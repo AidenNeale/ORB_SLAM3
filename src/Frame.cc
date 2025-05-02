@@ -107,8 +107,6 @@ Frame::Frame(const Frame &frame)
       mbIsSet(frame.mbIsSet),
       mbImuPreintegrated(frame.mbImuPreintegrated),
       mpMutexImu(frame.mpMutexImu),
-      mpCamera(frame.mpCamera),
-      mpCamera2(frame.mpCamera2),
       Nleft(frame.Nleft),
       Nright(frame.Nright),
       monoLeft(frame.monoLeft),
@@ -122,7 +120,9 @@ Frame::Frame(const Frame &frame)
       mTrl(frame.mTrl),
       mTcw(frame.mTcw),
       mbHasPose(false),
-      mbHasVelocity(false) {
+      mbHasVelocity(false),
+      mpCamera(frame.mpCamera),
+      mpCamera2(frame.mpCamera2) {
   for (int i = 0; i < FRAME_GRID_COLS; i++)
     for (int j = 0; j < FRAME_GRID_ROWS; j++) {
       mGrid[i][j] = frame.mGrid[i][j];

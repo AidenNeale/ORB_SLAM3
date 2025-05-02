@@ -198,7 +198,7 @@ class Preintegrated {
 
   void printMeasurements() const {
     std::cout << "pint meas:\n";
-    for (int i = 0; i < mvMeasurements.size(); i++) {
+    for (unsigned int i = 0; i < mvMeasurements.size(); i++) {
       std::cout << "meas " << mvMeasurements[i].t << std::endl;
     }
     std::cout << "end pint meas:\n";

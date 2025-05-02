@@ -2868,7 +2868,9 @@ void Optimizer::InertialOptimization(Map* pMap, Eigen::Matrix3d& Rwg, double& sc
   // Set KeyFrame vertices (fixed poses and optimizable velocities)
   for (size_t i = 0; i < vpKFs.size(); i++) {
     KeyFrame* pKFi = vpKFs[i];
-    if (pKFi->mnId > maxKFid) continue;
+    if (pKFi->mnId > maxKFid) {
+      continue;
+    }
     VertexPose* VP = new VertexPose(pKFi);
     VP->setId(pKFi->mnId);
     VP->setFixed(true);
@@ -2876,10 +2878,7 @@ void Optimizer::InertialOptimization(Map* pMap, Eigen::Matrix3d& Rwg, double& sc
 
     VertexVelocity* VV = new VertexVelocity(pKFi);
     VV->setId(maxKFid + (pKFi->mnId) + 1);
-    if (bFixedVel)
-      VV->setFixed(true);
-    else
-      VV->setFixed(false);
+    VV->setFixed(bFixedVel);
 
     optimizer.addVertex(VV);
   }
@@ -2887,17 +2886,12 @@ void Optimizer::InertialOptimization(Map* pMap, Eigen::Matrix3d& Rwg, double& sc
   // Biases
   VertexGyroBias* VG = new VertexGyroBias(vpKFs.front());
   VG->setId(maxKFid * 2 + 2);
-  if (bFixedVel)
-    VG->setFixed(true);
-  else
-    VG->setFixed(false);
+  VG->setFixed(bFixedVel);
+
   optimizer.addVertex(VG);
   VertexAccBias* VA = new VertexAccBias(vpKFs.front());
   VA->setId(maxKFid * 2 + 3);
-  if (bFixedVel)
-    VA->setFixed(true);
-  else
-    VA->setFixed(false);
+  VA->setFixed(bFixedVel);
 
   optimizer.addVertex(VA);
   // prior acc bias
@@ -3000,10 +2994,12 @@ void Optimizer::InertialOptimization(Map* pMap, Eigen::Matrix3d& Rwg, double& sc
   Rwg = VGDir->estimate().Rwg;
 
   // Keyframes velocities and biases
-  const int N = vpKFs.size();
+  const unsigned int N = vpKFs.size();
   for (size_t i = 0; i < N; i++) {
     KeyFrame* pKFi = vpKFs[i];
-    if (pKFi->mnId > maxKFid) continue;
+    if (pKFi->mnId > maxKFid) {
+      continue;
+    }
 
     VertexVelocity* VV = static_cast<VertexVelocity*>(optimizer.vertex(maxKFid + (pKFi->mnId) + 1));
     Eigen::Vector3d Vw = VV->estimate();  // Velocity is scaled after
@@ -4964,8 +4960,6 @@ void Optimizer::OptimizeEssentialGraph4DoF(Map* pMap, KeyFrame* pLoopKF, KeyFram
                                            const LoopClosing::KeyFrameAndPose& NonCorrectedSim3,
                                            const LoopClosing::KeyFrameAndPose& CorrectedSim3,
                                            const map<KeyFrame*, set<KeyFrame*>>& LoopConnections) {
-  typedef g2o::BlockSolver<g2o::BlockSolverTraits<4, 4>> BlockSolver_4_4;
-
   // Setup optimizer
   g2o::SparseOptimizer optimizer;
   optimizer.setVerbose(false);
@@ -5031,7 +5025,6 @@ void Optimizer::OptimizeEssentialGraph4DoF(Map* pMap, KeyFrame* pLoopKF, KeyFram
   matLambda(0, 0) = 1e3;
 
   // Set Loop edges
-  Edge4DoF* e_loop;
   for (map<KeyFrame*, set<KeyFrame*>>::const_iterator mit = LoopConnections.begin(),
                                                       mend = LoopConnections.end();
        mit != mend; mit++) {
@@ -5058,7 +5051,6 @@ void Optimizer::OptimizeEssentialGraph4DoF(Map* pMap, KeyFrame* pLoopKF, KeyFram
       e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(nIDi)));
 
       e->information() = matLambda;
-      e_loop = e;
       optimizer.addEdge(e);
 
       sInsertedEdges.insert(make_pair(min(nIDi, nIDj), max(nIDi, nIDj)));
@@ -5076,10 +5068,11 @@ void Optimizer::OptimizeEssentialGraph4DoF(Map* pMap, KeyFrame* pLoopKF, KeyFram
     // Use noncorrected poses for posegraph edges
     LoopClosing::KeyFrameAndPose::const_iterator iti = NonCorrectedSim3.find(pKF);
 
-    if (iti != NonCorrectedSim3.end())
+    if (iti != NonCorrectedSim3.end()) {
       Siw = iti->second;
-    else
+    } else {
       Siw = vScw[nIDi];
+    }
 
     // 1.1.0 Spanning tree edge
     KeyFrame* pParentKF = static_cast<KeyFrame*>(NULL);

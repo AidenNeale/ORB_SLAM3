@@ -303,7 +303,7 @@ class Tracking {
   int mMaxFrames;
 
   int mnFirstImuFrameId;
-  int mnFramesToResetIMU;
+  unsigned int mnFramesToResetIMU;
 
   // Threshold close/far points
   // Points seen as close by the stereo/RGBD sensor are considered reliable
